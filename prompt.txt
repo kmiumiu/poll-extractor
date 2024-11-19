@@ -1,0 +1,18 @@
+Present the metadata of all the polls mentioned in the article in the following JSON format:
+
+{
+    "polls": [
+	{
+	    "pollster": "Pollster name (or 'N/A' if not available)",
+	    "sponsor": "Sponsor of the poll (or 'N/A' if not available)",
+	    "date": "Dates the poll was conducted (or 'N/A' if not available)",
+	    "location": "Location of the poll (or 'N/A' if not available)",
+	    "sample_size": "Sample size of the poll (or 'N/A' if not available)",
+	    "poll url": "URL of the poll (or 'N/A' if not available)"
+	},
+	...
+    ]
+}
+
+Make sure to include all available poll metadata, even if some fields are marked as 'N/A'.
+Do not hallucinate.
