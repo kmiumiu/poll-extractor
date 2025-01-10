@@ -1,5 +1,7 @@
-import json
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
+import json
 from pydantic import BaseModel
 from typing import Optional, Dict
 from scrapegraphai.graphs import SmartScraperGraph
