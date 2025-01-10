@@ -1,7 +1,7 @@
 import json
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict
 from scrapegraphai.graphs import SmartScraperGraph
 
 app = FastAPI()
@@ -27,22 +27,42 @@ DEFAULT_PROMPT = """
     Do not hallucinate.
 """
 
+
+def generate_prompt(obj_name: str, obj_fields: Dict[str, str]) -> str:
+    lines = ['Present the metadata of all the polls mentioned in the article in the following JSON format:\n']
+    lines.append(f'{{\n    "{obj_name}": [\n    {{\n')  
+
+    for field_name, desc in obj_fields.items():
+        lines.append(f'    "{field_name}": "{desc} (or \'N/A\' if not available)",\n')
+    lines.append('    }},\n    ...\n]\n}}\n\n')
+    lines.append('Make sure to include all available poll metadata, even if some fields are marked as "N/A".\nDo not hallucinate.\n')
+
+    return ''.join(lines)
+
+
 # Input model
 class ProcessRequest(BaseModel):
     url: str
     api_key: str
-    prompt: Optional[str] = None
+    obj_name: str | None = None
+    obj_fields: Dict[str, str] | None = None
 
 
 @app.post("/process")
-async def process(request: ProcessRequest):
+def process(request: ProcessRequest):
     try:
         if not request.url:
             raise HTTPException(status_code=400, detail="URL is required")
         if not request.api_key:
             raise HTTPException(status_code=400, detail="API key is required")
 
-        prompt = request.prompt or DEFAULT_PROMPT
+
+        if request.obj_name and request.obj_fields:
+            prompt = generate_prompt(request.obj_name, request.obj_fields)
+        else:
+            prompt = DEFAULT_PROMPT
+
+
         source_url = 'https://r.jina.ai/' + request.url
 
         # Define the configuration for the scraping pipeline
