@@ -1,11 +1,7 @@
-# Define custom function directory
-ARG FUNCTION_DIR="/function"
-
 FROM mcr.microsoft.com/playwright/python:v1.48.0-noble as build-image
 
-ARG FUNCTION_DIR
+WORKDIR /code
 
-# Install aws-lambda-ric build dependencies
 RUN apt-get update && apt-get install -y \
     g++ \
     make \
@@ -16,17 +12,13 @@ RUN apt-get update && apt-get install -y \
     libtool
 
 # Install deps
-RUN mkdir -p ${FUNCTION_DIR}
-COPY requirements.txt ${FUNCTION_DIR}
+COPY ./requirements.txt /code/requirements.txt
 
-RUN pip install --target ${FUNCTION_DIR} -r ${FUNCTION_DIR}/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # Copy function code
-COPY lambda_function.py ${FUNCTION_DIR}
+COPY ./main.py /code/main.py
 
-WORKDIR ${FUNCTION_DIR}
+EXPOSE 5000
 
-# Set runtime interface client as default command for the container runtime
-ENTRYPOINT [ "python", "-m", "awslambdaric" ]
-
-CMD ["lambda_function.lambda_handler"]
+CMD ["fastapi", "run", "main.py", "--port", "5000"]
