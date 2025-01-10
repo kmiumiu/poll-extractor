@@ -6,6 +6,15 @@ from scrapegraphai.graphs import SmartScraperGraph
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 # Default prompt
 DEFAULT_PROMPT = """
     Present the metadata of all the polls mentioned in the article in the following JSON format:
